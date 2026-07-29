@@ -11,3 +11,17 @@ export async function createCalendarEvent(
 
   return response.data;
 }
+
+export async function getUpcomingEvents(
+  calendar: calendar_v3.Calendar
+) {
+  const response = await calendar.events.list({
+    calendarId: "primary",
+    maxResults: 10,
+    singleEvents: true,
+    orderBy: "startTime",
+    timeMin: new Date().toISOString(),
+  });
+
+  return response.data.items ?? [];
+}
