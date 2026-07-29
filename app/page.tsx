@@ -1,6 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+
+import { useSession } from "next-auth/react";
 
 import Navbar from "@/components/Navbar";
 import LoginButton from "@/components/LoginButton";
@@ -24,12 +26,21 @@ interface CalendarEvent {
 export default function Home() {
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedEvent, setSelectedEvent] =
-  useState<CalendarEvent | null>(null);
+  const formRef = useRef<HTMLDivElement>(null);
+  const { status } = useSession();
+  const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(
+    null,
+  );
 
   async function fetchEvents() {
     try {
       const response = await fetch("/api/calendar");
+
+      if (response.status === 401) {
+        console.log("Session expired");
+
+        return;
+      }
 
       if (!response.ok) {
         throw new Error("Failed to fetch events");
@@ -46,8 +57,26 @@ export default function Home() {
   }
 
   useEffect(() => {
-    fetchEvents();
-  }, []);
+    if (status === "authenticated") {
+      fetchEvents();
+    } else if (status === "unauthenticated") {
+      setEvents([]);
+      setLoading(false);
+    }
+  }, [status]);
+
+  function handleEdit(event: CalendarEvent) {
+    setSelectedEvent(event);
+
+    formRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
+  }
+
+  function clearSelectedEvent() {
+    setSelectedEvent(null);
+  }
 
   return (
     <main className="min-h-screen bg-black">
@@ -56,9 +85,11 @@ export default function Home() {
       <section className="mx-auto max-w-3xl p-8">
         <LoginButton />
 
-        <EventForm onSuccess={fetchEvents} selectedEvent={selectedEvent} />
+        <div ref={formRef}>
+          <EventForm onSuccess={fetchEvents} selectedEvent={selectedEvent} onCancelEdit={clearSelectedEvent} />
+        </div>
 
-        <EventList events={events} loading={loading} onEdit={setSelectedEvent} />
+        <EventList events={events} loading={loading} onEdit={handleEdit} />
       </section>
     </main>
   );

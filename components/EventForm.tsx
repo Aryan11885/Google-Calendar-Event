@@ -26,11 +26,13 @@ interface EventFormData {
 interface EventFormProps {
   onSuccess: () => void;
   selectedEvent: CalendarEvent | null;
+  onCancelEdit: () => void;
 }
 
 export default function EventForm({
   onSuccess,
   selectedEvent,
+  onCancelEdit,
 }: EventFormProps) {
   const [event, setEvent] = useState<EventFormData>({
     summary: "",
@@ -71,7 +73,7 @@ export default function EventForm({
   }, [selectedEvent]);
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     setEvent((prev) => ({
       ...prev,
@@ -79,9 +81,7 @@ export default function EventForm({
     }));
   };
 
-  const handleSubmit = async (
-    e: React.FormEvent<HTMLFormElement>
-  ) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     setLoading(true);
@@ -100,19 +100,21 @@ export default function EventForm({
 
       if (!response.ok) {
         throw new Error(
-          isEditing
-            ? "Failed to update event"
-            : "Failed to create event"
+          isEditing ? "Failed to update event" : "Failed to create event",
         );
       }
 
       alert(
         isEditing
           ? "✅ Event updated successfully!"
-          : "✅ Event created successfully!"
+          : "✅ Event created successfully!",
       );
 
       await onSuccess();
+
+      if (isEditing) {
+        onCancelEdit();
+      }
 
       setEvent({
         summary: "",
@@ -125,9 +127,7 @@ export default function EventForm({
       console.error(error);
 
       alert(
-        isEditing
-          ? "❌ Failed to update event"
-          : "❌ Failed to create event"
+        isEditing ? "❌ Failed to update event" : "❌ Failed to create event",
       );
     } finally {
       setLoading(false);
@@ -201,6 +201,15 @@ export default function EventForm({
             ? "Update Event"
             : "Create Event"}
       </button>
+      {isEditing && (
+        <button
+          type="button"
+          onClick={onCancelEdit}
+          className="w-full rounded bg-gray-600 p-2 text-white hover:bg-gray-700"
+        >
+          Cancel Edit
+        </button>
+      )}
     </form>
   );
 }

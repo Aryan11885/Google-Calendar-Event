@@ -39,3 +39,17 @@ export async function updateCalendarEvent(
 
   return response.data;
 }
+
+export async function deleteCalendarEvent(
+  calendar: calendar_v3.Calendar,
+  eventId: string
+) {
+  await calendar.events.delete({
+    calendarId: "primary",
+    eventId,
+  });
+
+  return {
+    success: true,
+  };
+}

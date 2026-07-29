@@ -5,6 +5,7 @@ import {
   createCalendarEvent,
   getUpcomingEvents,
   updateCalendarEvent,
+  deleteCalendarEvent,
 } from "@/services/calendar.service";
 
 export async function POST(req: Request) {
@@ -62,6 +63,10 @@ export async function POST(req: Request) {
 export async function GET() {
   try {
     const session = await auth();
+
+    console.log("========== SESSION ==========");
+    console.dir(session, { depth: null });
+    console.log("=============================");
 
     if (!session?.accessToken) {
       return NextResponse.json(
@@ -134,4 +139,25 @@ export async function PATCH(req: Request) {
       { status: 500 }
     );
   }
+}
+
+export async function DELETE(request: Request) {
+  const session = await auth();
+
+  if (!session?.accessToken) {
+    return Response.json(
+      { error: "Unauthorized" },
+      { status: 401 }
+    );
+  }
+
+  const body = await request.json();
+
+  const calendar = getGoogleCalendar(session.accessToken);
+
+  await deleteCalendarEvent(calendar, body.id);
+
+  return Response.json({
+    message: "Event deleted successfully",
+  });
 }
