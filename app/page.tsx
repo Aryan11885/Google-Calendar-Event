@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-
 import { useSession } from "next-auth/react";
 
 import Navbar from "@/components/Navbar";
@@ -24,21 +23,21 @@ interface CalendarEvent {
 }
 
 export default function Home() {
+  const { status } = useSession();
+
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [loading, setLoading] = useState(true);
-  const formRef = useRef<HTMLDivElement>(null);
-  const { status } = useSession();
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(
     null,
   );
+
+  const formRef = useRef<HTMLDivElement>(null);
 
   async function fetchEvents() {
     try {
       const response = await fetch("/api/calendar");
 
       if (response.status === 401) {
-        console.log("Session expired");
-
         return;
       }
 
@@ -100,21 +99,104 @@ export default function Home() {
   }
 
   return (
-    <main className="min-h-screen bg-black">
+    <main className="min-h-screen bg-gradient-to-br from-slate-950 via-black to-slate-900 text-white">
       <Navbar />
 
-      <section className="mx-auto max-w-3xl p-8">
-        <LoginButton />
+      <section className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        {/* Hero */}
+        <div className="glass card-shadow mb-8 overflow-hidden rounded-3xl border border-white/10">
+          <div className="relative p-8 sm:p-10 lg:p-14">
+            <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 via-violet-500/10 to-cyan-500/10" />
 
-        <div ref={formRef}>
-          <EventForm
-            onSuccess={fetchEvents}
-            selectedEvent={selectedEvent}
-            onCancelEdit={clearSelectedEvent}
-          />
+            <div className="relative z-10 flex flex-col gap-8 lg:flex-row lg:items-center lg:justify-between">
+              <div className="max-w-3xl">
+                <span className="mb-4 inline-flex items-center rounded-full border border-blue-500/30 bg-blue-500/10 px-4 py-1 text-sm font-medium text-blue-300">
+                  Google Calendar Scheduler
+                </span>
+
+                <h1 className="mt-3 text-4xl font-bold tracking-tight text-white sm:text-5xl">
+                  Manage Your Calendar
+                  <span className="block bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
+                    Faster & Smarter
+                  </span>
+                </h1>
+
+                <p className="mt-6 max-w-2xl text-base leading-8 text-slate-300 sm:text-lg">
+                  Create, update and organize your Google Calendar events from
+                  one clean dashboard. Built for speed, productivity and a
+                  seamless scheduling experience.
+                </p>
+              </div>
+
+              <div className="w-full max-w-sm rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur">
+                <p className="mb-4 text-sm font-semibold uppercase tracking-wider text-slate-400">
+                  Account
+                </p>
+
+                <LoginButton />
+              </div>
+            </div>
+          </div>
         </div>
 
-        <EventList events={events} loading={loading} onEdit={handleEdit} onDelete={deleteEvent}/>
+        {/* Main Grid */}
+        <div className="grid gap-8 xl:grid-cols-[430px_1fr]">
+          {/* Left Side */}
+          <div className="space-y-8">
+            <div
+              ref={formRef}
+              className="glass card-shadow rounded-3xl border border-white/10 p-6 sm:p-8"
+            >
+              <div className="mb-6">
+                <h2 className="text-2xl font-semibold text-white">
+                  {selectedEvent ? "Edit Event" : "Create Event"}
+                </h2>
+
+                <p className="mt-2 text-sm text-slate-400">
+                  Fill in the details below to schedule your Google Calendar
+                  event.
+                </p>
+              </div>
+
+              <EventForm
+                onSuccess={fetchEvents}
+                selectedEvent={selectedEvent}
+                onCancelEdit={clearSelectedEvent}
+              />
+            </div>
+          </div>
+
+          {/* Right Side */}
+          <div className="glass card-shadow rounded-3xl border border-white/10 p-6 sm:p-8">
+            <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <h2 className="text-2xl font-semibold text-white">
+                  Upcoming Events
+                </h2>
+
+                <p className="mt-2 text-sm text-slate-400">
+                  View, edit and manage all your upcoming Google Calendar
+                  events.
+                </p>
+              </div>
+
+              {!loading && (
+                <div className="rounded-xl border border-blue-500/20 bg-blue-500/10 px-4 py-2">
+                  <span className="text-sm font-medium text-blue-300">
+                    {events.length} {events.length === 1 ? "Event" : "Events"}
+                  </span>
+                </div>
+              )}
+            </div>
+
+            <EventList
+              events={events}
+              loading={loading}
+              onEdit={handleEdit}
+              onDelete={deleteEvent}
+            />
+          </div>
+        </div>
       </section>
     </main>
   );
