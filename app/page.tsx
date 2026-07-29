@@ -74,6 +74,27 @@ export default function Home() {
     });
   }
 
+  async function deleteEvent(id: string) {
+    const confirmed = confirm("Are you sure you want to delete this event?");
+
+    if (!confirmed) return;
+
+    const response = await fetch("/api/calendar", {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ id }),
+    });
+
+    if (!response.ok) {
+      alert("Failed to delete event.");
+      return;
+    }
+
+    fetchEvents();
+  }
+
   function clearSelectedEvent() {
     setSelectedEvent(null);
   }
@@ -86,10 +107,14 @@ export default function Home() {
         <LoginButton />
 
         <div ref={formRef}>
-          <EventForm onSuccess={fetchEvents} selectedEvent={selectedEvent} onCancelEdit={clearSelectedEvent} />
+          <EventForm
+            onSuccess={fetchEvents}
+            selectedEvent={selectedEvent}
+            onCancelEdit={clearSelectedEvent}
+          />
         </div>
 
-        <EventList events={events} loading={loading} onEdit={handleEdit} />
+        <EventList events={events} loading={loading} onEdit={handleEdit} onDelete={deleteEvent}/>
       </section>
     </main>
   );

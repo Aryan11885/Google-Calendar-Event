@@ -14,9 +14,10 @@ interface EventListProps {
   events: CalendarEvent[];
   loading: boolean;
   onEdit: (event: CalendarEvent) => void;
+  onDelete: (id: string) => void;
 }
 
-export default function EventList({ events, loading,  onEdit, }: EventListProps) {
+export default function EventList({ events, loading, onEdit, onDelete }: EventListProps) {
   if (loading) {
     return <div className="max-w-2xl mx-auto mt-10">Loading events...</div>;
   }
@@ -58,13 +59,17 @@ export default function EventList({ events, loading,  onEdit, }: EventListProps)
                 </a>
               )}
               <div className="mt-4 flex gap-3">
-                <button 
-                onClick={() => onEdit(event)} 
-                className="rounded bg-yellow-500 px-4 py-2 text-white hover:bg-yellow-600">
+                <button
+                  onClick={() => onEdit(event)}
+                  className="rounded bg-yellow-500 px-4 py-2 text-white hover:bg-yellow-600"
+                >
                   Edit
                 </button>
 
-                <button className="rounded bg-red-600 px-4 py-2 text-white hover:bg-red-700">
+                <button
+                  onClick={() => onDelete(event.id)}
+                  className="rounded bg-red-600 px-4 py-2 text-white hover:bg-red-700"
+                >
                   Delete
                 </button>
               </div>
