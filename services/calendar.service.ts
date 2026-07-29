@@ -25,3 +25,17 @@ export async function getUpcomingEvents(
 
   return response.data.items ?? [];
 }
+
+export async function updateCalendarEvent(
+  calendar: calendar_v3.Calendar,
+  eventId: string,
+  event: calendar_v3.Schema$Event
+) {
+  const response = await calendar.events.update({
+    calendarId: "primary",
+    eventId,
+    requestBody: event,
+  });
+
+  return response.data;
+}

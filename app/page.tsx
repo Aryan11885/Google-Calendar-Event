@@ -11,8 +11,12 @@ interface CalendarEvent {
   id: string;
   summary?: string;
   description?: string;
+  location?: string;
   htmlLink?: string;
   start?: {
+    dateTime?: string;
+  };
+  end?: {
     dateTime?: string;
   };
 }
@@ -20,6 +24,8 @@ interface CalendarEvent {
 export default function Home() {
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedEvent, setSelectedEvent] =
+  useState<CalendarEvent | null>(null);
 
   async function fetchEvents() {
     try {
@@ -50,9 +56,9 @@ export default function Home() {
       <section className="mx-auto max-w-3xl p-8">
         <LoginButton />
 
-        <EventForm />
+        <EventForm onSuccess={fetchEvents} selectedEvent={selectedEvent} />
 
-        <EventList />
+        <EventList events={events} loading={loading} onEdit={setSelectedEvent} />
       </section>
     </main>
   );

@@ -1,7 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
-
 interface CalendarEvent {
   id: string;
   summary?: string;
@@ -12,62 +10,35 @@ interface CalendarEvent {
   };
 }
 
-export default function EventList() {
-  const [events, setEvents] = useState<CalendarEvent[]>([]);
-  const [loading, setLoading] = useState(true);
+interface EventListProps {
+  events: CalendarEvent[];
+  loading: boolean;
+  onEdit: (event: CalendarEvent) => void;
+}
 
-  useEffect(() => {
-    fetchEvents();
-  }, []);
-
-  async function fetchEvents() {
-    try {
-      const response = await fetch("/api/calendar");
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch events");
-      }
-
-      const data = await response.json();
-
-      setEvents(data);
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
-  }
-
+export default function EventList({ events, loading,  onEdit, }: EventListProps) {
   if (loading) {
-    return (
-      <div className="max-w-2xl mx-auto mt-10">
-        Loading events...
-      </div>
-    );
+    return <div className="max-w-2xl mx-auto mt-10">Loading events...</div>;
   }
 
   return (
     <div className="max-w-2xl mx-auto mt-10">
-      <h2 className="text-2xl font-bold mb-6">
-        Upcoming Events
-      </h2>
+      <h2 className="text-2xl font-bold mb-6 text-white">Upcoming Events</h2>
 
       {events.length === 0 ? (
-        <p>No upcoming events.</p>
+        <p className="text-gray-400">No upcoming events.</p>
       ) : (
         <div className="space-y-4">
           {events.map((event) => (
             <div
               key={event.id}
-              className="border rounded-lg p-4 shadow-sm"
+              className="border rounded-lg p-4 shadow-sm bg-white"
             >
               <h3 className="text-lg font-semibold">
                 {event.summary || "Untitled Event"}
               </h3>
 
-              <p className="text-gray-600 mt-1">
-                {event.description}
-              </p>
+              <p className="text-gray-600 mt-1">{event.description}</p>
 
               <p className="mt-2">
                 📅{" "}
@@ -86,6 +57,17 @@ export default function EventList() {
                   Open in Google Calendar
                 </a>
               )}
+              <div className="mt-4 flex gap-3">
+                <button 
+                onClick={() => onEdit(event)} 
+                className="rounded bg-yellow-500 px-4 py-2 text-white hover:bg-yellow-600">
+                  Edit
+                </button>
+
+                <button className="rounded bg-red-600 px-4 py-2 text-white hover:bg-red-700">
+                  Delete
+                </button>
+              </div>
             </div>
           ))}
         </div>

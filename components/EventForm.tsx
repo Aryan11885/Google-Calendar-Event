@@ -1,10 +1,38 @@
 "use client";
 
-import { useState } from "react";
-import { CalendarEvent } from "@/types/calendar";
+import { useEffect, useState } from "react";
 
-export default function EventForm() {
-  const [event, setEvent] = useState<CalendarEvent>({
+interface CalendarEvent {
+  id: string;
+  summary?: string;
+  description?: string;
+  location?: string;
+  start?: {
+    dateTime?: string;
+  };
+  end?: {
+    dateTime?: string;
+  };
+}
+
+interface EventFormData {
+  summary: string;
+  description: string;
+  location: string;
+  start: string;
+  end: string;
+}
+
+interface EventFormProps {
+  onSuccess: () => void;
+  selectedEvent: CalendarEvent | null;
+}
+
+export default function EventForm({
+  onSuccess,
+  selectedEvent,
+}: EventFormProps) {
+  const [event, setEvent] = useState<EventFormData>({
     summary: "",
     description: "",
     location: "",
@@ -14,13 +42,41 @@ export default function EventForm() {
 
   const [loading, setLoading] = useState(false);
 
+  const isEditing = selectedEvent !== null;
+
+  useEffect(() => {
+    if (!selectedEvent) {
+      setEvent({
+        summary: "",
+        description: "",
+        location: "",
+        start: "",
+        end: "",
+      });
+
+      return;
+    }
+
+    setEvent({
+      summary: selectedEvent.summary || "",
+      description: selectedEvent.description || "",
+      location: selectedEvent.location || "",
+      start: selectedEvent.start?.dateTime
+        ? selectedEvent.start.dateTime.slice(0, 16)
+        : "",
+      end: selectedEvent.end?.dateTime
+        ? selectedEvent.end.dateTime.slice(0, 16)
+        : "",
+    });
+  }, [selectedEvent]);
+
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
-    setEvent({
-      ...event,
+    setEvent((prev) => ({
+      ...prev,
       [e.target.name]: e.target.value,
-    });
+    }));
   };
 
   const handleSubmit = async (
@@ -32,18 +88,31 @@ export default function EventForm() {
 
     try {
       const response = await fetch("/api/calendar", {
-        method: "POST",
+        method: isEditing ? "PATCH" : "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(event),
+        body: JSON.stringify({
+          ...event,
+          id: selectedEvent?.id,
+        }),
       });
 
       if (!response.ok) {
-        throw new Error("Failed to create event");
+        throw new Error(
+          isEditing
+            ? "Failed to update event"
+            : "Failed to create event"
+        );
       }
 
-      alert("✅ Event created successfully!");
+      alert(
+        isEditing
+          ? "✅ Event updated successfully!"
+          : "✅ Event created successfully!"
+      );
+
+      await onSuccess();
 
       setEvent({
         summary: "",
@@ -54,7 +123,12 @@ export default function EventForm() {
       });
     } catch (error) {
       console.error(error);
-      alert("❌ Failed to create event");
+
+      alert(
+        isEditing
+          ? "❌ Failed to update event"
+          : "❌ Failed to create event"
+      );
     } finally {
       setLoading(false);
     }
@@ -63,15 +137,19 @@ export default function EventForm() {
   return (
     <form
       onSubmit={handleSubmit}
-      className="max-w-xl mx-auto mt-10 space-y-4 bg-amber-950"
+      className="max-w-xl mx-auto mt-10 space-y-4 rounded-lg bg-amber-950 p-6"
     >
+      <h2 className="text-2xl font-bold text-white">
+        {isEditing ? "Edit Event" : "Create Event"}
+      </h2>
+
       <input
         type="text"
         name="summary"
         placeholder="Meeting Title"
         value={event.summary}
         onChange={handleChange}
-        className="w-full border rounded p-2"
+        className="w-full rounded border p-2"
         required
       />
 
@@ -80,7 +158,7 @@ export default function EventForm() {
         placeholder="Description"
         value={event.description}
         onChange={handleChange}
-        className="w-full border rounded p-2"
+        className="w-full rounded border p-2"
       />
 
       <input
@@ -89,7 +167,7 @@ export default function EventForm() {
         placeholder="Location"
         value={event.location}
         onChange={handleChange}
-        className="w-full border rounded p-2"
+        className="w-full rounded border p-2"
       />
 
       <input
@@ -97,7 +175,7 @@ export default function EventForm() {
         name="start"
         value={event.start}
         onChange={handleChange}
-        className="w-full border rounded p-2"
+        className="w-full rounded border p-2"
         required
       />
 
@@ -106,16 +184,22 @@ export default function EventForm() {
         name="end"
         value={event.end}
         onChange={handleChange}
-        className="w-full border rounded p-2"
+        className="w-full rounded border p-2"
         required
       />
 
       <button
         type="submit"
         disabled={loading}
-        className="w-full bg-blue-600 text-white rounded p-2 hover:bg-blue-700 disabled:opacity-50"
+        className="w-full rounded bg-blue-600 p-2 text-white hover:bg-blue-700 disabled:opacity-50"
       >
-        {loading ? "Creating..." : "Create Event"}
+        {loading
+          ? isEditing
+            ? "Updating..."
+            : "Creating..."
+          : isEditing
+            ? "Update Event"
+            : "Create Event"}
       </button>
     </form>
   );
