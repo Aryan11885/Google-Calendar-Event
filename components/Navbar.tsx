@@ -32,7 +32,7 @@ export default function Navbar() {
               Connected
             </span>
             <span className="text-xs sm:text-sm font-medium text-emerald-300 hidden sm:block">
-              · Google Calendar
+                Google Calendar Connected
             </span>
           </div>
         )}

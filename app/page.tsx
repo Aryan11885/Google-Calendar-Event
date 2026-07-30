@@ -9,7 +9,7 @@ import EventForm from "@/components/EventForm";
 import EventList from "@/components/EventList";
 import DeleteDialog from "@/components/DeleteDialog";
 import { toast } from "sonner";
-import { CalendarDays } from "lucide-react";
+import { CalendarDays, CalendarPlus, ListChecks } from "lucide-react";
 
 interface CalendarEvent {
   id: string;
@@ -26,9 +26,13 @@ export default function Home() {
 
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
+  const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(
+    null,
+  );
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [eventToDelete, setEventToDelete] = useState<CalendarEvent | null>(null);
+  const [eventToDelete, setEventToDelete] = useState<CalendarEvent | null>(
+    null,
+  );
   const [deleteLoading, setDeleteLoading] = useState(false);
 
   const formRef = useRef<HTMLDivElement>(null);
@@ -94,44 +98,61 @@ export default function Home() {
   }
 
   return (
-    <main className="min-h-screen bg-slate-950 text-white">
+    <main className="relative min-h-screen bg-slate-950 text-white overflow-x-hidden">
+      {/* Ambient background: soft glows + faint grid, so the page reads as one surface, not two floating cards */}
+      <div className="pointer-events-none fixed inset-0 -z-10">
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.035)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.035)_1px,transparent_1px)] bg-[size:44px_44px] [mask-image:radial-gradient(ellipse_80%_60%_at_50%_0%,#000_40%,transparent_100%)]" />
+        <div className="absolute -top-32 left-1/4 h-96 w-96 rounded-full bg-blue-600/20 blur-[120px]" />
+        <div className="absolute top-1/3 right-0 h-96 w-96 rounded-full bg-indigo-500/10 blur-[120px]" />
+      </div>
+
       <Navbar />
 
-      <section className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
-
+      <section className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
         {/* Page header */}
-        <div className="mb-6 sm:mb-8">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <h1 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
-                Calendar
-              </h1>
-              <p className="text-sm text-slate-400 mt-1">
-                Create and manage your Google Calendar events
-              </p>
-            </div>
+        <div className="mb-8 sm:mb-10">
+          <div className="rounded-2xl border border-white/10 bg-white/[0.04] backdrop-blur-sm p-5 sm:p-6 shadow-xl shadow-black/20">
+            <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-center gap-3.5">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 shadow-lg shadow-blue-900/40">
+                  <CalendarDays className="h-5.5 w-5.5 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
+                    Calendar
+                  </h1>
+                  <p className="text-sm text-slate-400 mt-0.5">
+                    Create and manage your Google Calendar events
+                  </p>
+                </div>
+              </div>
 
-            <div className="w-full max-w-xs">
-              <LoginButton />
+              <div className="w-full sm:w-auto sm:max-w-xs">
+                <LoginButton />
+              </div>
             </div>
           </div>
         </div>
 
         {/* Main grid */}
-        <div className="grid gap-6 xl:grid-cols-[400px_1fr]">
-
+        <div className="grid gap-6 xl:grid-cols-[400px_1fr] items-start">
           {/* Left — Form */}
-          <div ref={formRef}>
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-5 sm:p-6">
-              <div className="mb-5">
-                <h2 className="text-sm font-semibold text-white">
-                  {selectedEvent ? "Edit Event" : "New Event"}
-                </h2>
-                <p className="text-xs text-slate-400 mt-1">
-                  {selectedEvent
-                    ? "Update the details for this event."
-                    : "Fill in the details below to create an event."}
-                </p>
+          <div ref={formRef} className="xl:sticky xl:top-6">
+            <div className="rounded-2xl border border-white/10 bg-white/[0.04] backdrop-blur-sm p-5 sm:p-6 shadow-xl shadow-black/20">
+              <div className="mb-5 flex items-center gap-3">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-500/10 border border-blue-500/20">
+                  <CalendarPlus className="h-4.5 w-4.5 text-blue-400" />
+                </div>
+                <div>
+                  <h2 className="text-sm font-semibold text-white">
+                    {selectedEvent ? "Edit Event" : "New Event"}
+                  </h2>
+                  <p className="text-xs text-slate-400 mt-0.5">
+                    {selectedEvent
+                      ? "Update the details for this event."
+                      : "Fill in the details below to create an event."}
+                  </p>
+                </div>
               </div>
 
               <EventForm
@@ -143,15 +164,20 @@ export default function Home() {
           </div>
 
           {/* Right — Events list */}
-          <div className="rounded-2xl border border-white/10 bg-white/5 p-5 sm:p-6">
+          <div className="rounded-2xl border border-white/10 bg-white/[0.04] backdrop-blur-sm p-5 sm:p-6 shadow-xl shadow-black/20">
             <div className="mb-5 flex items-center justify-between gap-3">
-              <div>
-                <h2 className="text-sm font-semibold text-white">
-                  Upcoming Events
-                </h2>
-                <p className="text-xs text-slate-400 mt-1">
-                  View, edit and manage your calendar events
-                </p>
+              <div className="flex items-center gap-3">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-indigo-500/10 border border-indigo-500/20">
+                  <ListChecks className="h-4.5 w-4.5 text-indigo-400" />
+                </div>
+                <div>
+                  <h2 className="text-sm font-semibold text-white">
+                    Upcoming Events
+                  </h2>
+                  <p className="text-xs text-slate-400 mt-0.5">
+                    View, edit and manage your calendar events
+                  </p>
+                </div>
               </div>
 
               {!loading && events.length > 0 && (
