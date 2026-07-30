@@ -1,7 +1,7 @@
 "use client";
 
 import { signIn, signOut, useSession } from "next-auth/react";
-import { LogOut, Mail, User, Chrome } from "lucide-react";
+import { LogOut, Mail, User, Globe } from "lucide-react";
 
 export default function LoginButton() {
   const { data: session } = useSession();
@@ -51,7 +51,7 @@ export default function LoginButton() {
     <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
       <div className="flex items-center gap-3 mb-4">
         <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-500/15 shrink-0">
-          <Chrome className="h-5 w-5 text-blue-400" />
+          <Globe className="h-5 w-5 text-blue-400" />
         </div>
         <div>
           <p className="text-sm font-semibold text-white">Connect Google</p>
@@ -63,7 +63,7 @@ export default function LoginButton() {
         onClick={() => signIn("google")}
         className="flex w-full items-center justify-center gap-2.5 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-blue-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
       >
-        <Chrome className="h-4 w-4" />
+        <Globe className="h-4 w-4" />
         Continue with Google
       </button>
     </div>

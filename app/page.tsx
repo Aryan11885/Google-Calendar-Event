@@ -9,6 +9,7 @@ import EventForm from "@/components/EventForm";
 import EventList from "@/components/EventList";
 import DeleteDialog from "@/components/DeleteDialog";
 import { toast } from "sonner";
+import { CalendarDays } from "lucide-react";
 
 interface CalendarEvent {
   id: string;
@@ -16,12 +17,8 @@ interface CalendarEvent {
   description?: string;
   location?: string;
   htmlLink?: string;
-  start?: {
-    dateTime?: string;
-  };
-  end?: {
-    dateTime?: string;
-  };
+  start?: { dateTime?: string };
+  end?: { dateTime?: string };
 }
 
 export default function Home() {
@@ -29,16 +26,9 @@ export default function Home() {
 
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(
-    null,
-  );
-
+  const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-
-  const [eventToDelete, setEventToDelete] = useState<CalendarEvent | null>(
-    null,
-  );
-
+  const [eventToDelete, setEventToDelete] = useState<CalendarEvent | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
 
   const formRef = useRef<HTMLDivElement>(null);
@@ -47,16 +37,11 @@ export default function Home() {
     try {
       const response = await fetch("/api/calendar");
 
-      if (response.status === 401) {
-        return;
-      }
+      if (response.status === 401) return;
 
-      if (!response.ok) {
-        throw new Error("Failed to fetch events");
-      }
+      if (!response.ok) throw new Error("Failed to fetch events");
 
       const data = await response.json();
-
       setEvents(data);
     } catch (error) {
       console.error(error);
@@ -76,11 +61,7 @@ export default function Home() {
 
   function handleEdit(event: CalendarEvent) {
     setSelectedEvent(event);
-
-    formRef.current?.scrollIntoView({
-      behavior: "smooth",
-      block: "start",
-    });
+    formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
   function deleteEvent(event: CalendarEvent) {
@@ -91,27 +72,18 @@ export default function Home() {
   async function confirmDelete() {
     if (!eventToDelete || deleteLoading) return;
 
+    setDeleteLoading(true);
     try {
-      setDeleteLoading(true);
-
       const response = await fetch("/api/calendar", {
         method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          id: eventToDelete.id,
-        }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: eventToDelete.id }),
       });
 
-      if (!response.ok) {
-        throw new Error("Delete failed");
-      }
+      if (!response.ok) throw new Error("Delete failed");
 
-      toast.success("Event deleted successfully.");
-
+      toast.success("Event deleted.");
       await fetchEvents();
-
       setDeleteDialogOpen(false);
       setEventToDelete(null);
     } catch {
@@ -121,96 +93,72 @@ export default function Home() {
     }
   }
 
-  function clearSelectedEvent() {
-    setSelectedEvent(null);
-  }
-
   return (
-    <main className="min-h-screen bg-gradient-to-br from-slate-950 via-black to-slate-900 text-white">
+    <main className="min-h-screen bg-slate-950 text-white">
       <Navbar />
 
-      <section className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        {/* Hero */}
-        <div className="glass card-shadow mb-8 overflow-hidden rounded-3xl border border-white/10">
-          <div className="relative p-8 sm:p-10 lg:p-14">
-            <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 via-violet-500/10 to-cyan-500/10" />
+      <section className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
 
-            <div className="relative z-10 flex flex-col gap-8 lg:flex-row lg:items-center lg:justify-between">
-              <div className="max-w-3xl">
-                <span className="mb-4 inline-flex items-center rounded-full border border-blue-500/30 bg-blue-500/10 px-4 py-1 text-sm font-medium text-blue-300">
-                  Google Calendar Scheduler
-                </span>
+        {/* Page header */}
+        <div className="mb-6 sm:mb-8">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h1 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
+                Calendar
+              </h1>
+              <p className="text-sm text-slate-400 mt-1">
+                Create and manage your Google Calendar events
+              </p>
+            </div>
 
-                <h1 className="mt-3 text-4xl font-bold tracking-tight text-white sm:text-5xl">
-                  Manage Your Calendar
-                  <span className="block bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
-                    Faster & Smarter
-                  </span>
-                </h1>
-
-                <p className="mt-6 max-w-2xl text-base leading-8 text-slate-300 sm:text-lg">
-                  Create, update and organize your Google Calendar events from
-                  one clean dashboard. Built for speed, productivity and a
-                  seamless scheduling experience.
-                </p>
-              </div>
-
-              <div className="w-full max-w-sm rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur">
-                <p className="mb-4 text-sm font-semibold uppercase tracking-wider text-slate-400">
-                  Account
-                </p>
-
-                <LoginButton />
-              </div>
+            <div className="w-full max-w-xs">
+              <LoginButton />
             </div>
           </div>
         </div>
 
-        {/* Main Grid */}
-        <div className="grid gap-8 xl:grid-cols-[430px_1fr]">
-          {/* Left Side */}
-          <div className="space-y-8">
-            <div
-              ref={formRef}
-              className="glass card-shadow rounded-3xl border border-white/10 p-6 sm:p-8"
-            >
-              <div className="mb-6">
-                <h2 className="text-2xl font-semibold text-white">
-                  {selectedEvent ? "Edit Event" : "Create Event"}
-                </h2>
+        {/* Main grid */}
+        <div className="grid gap-6 xl:grid-cols-[400px_1fr]">
 
-                <p className="mt-2 text-sm text-slate-400">
-                  Fill in the details below to schedule your Google Calendar
-                  event.
+          {/* Left — Form */}
+          <div ref={formRef}>
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-5 sm:p-6">
+              <div className="mb-5">
+                <h2 className="text-sm font-semibold text-white">
+                  {selectedEvent ? "Edit Event" : "New Event"}
+                </h2>
+                <p className="text-xs text-slate-400 mt-1">
+                  {selectedEvent
+                    ? "Update the details for this event."
+                    : "Fill in the details below to create an event."}
                 </p>
               </div>
 
               <EventForm
                 onSuccess={fetchEvents}
                 selectedEvent={selectedEvent}
-                onCancelEdit={clearSelectedEvent}
+                onCancelEdit={() => setSelectedEvent(null)}
               />
             </div>
           </div>
 
-          {/* Right Side */}
-          <div className="glass card-shadow rounded-3xl border border-white/10 p-6 sm:p-8">
-            <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          {/* Right — Events list */}
+          <div className="rounded-2xl border border-white/10 bg-white/5 p-5 sm:p-6">
+            <div className="mb-5 flex items-center justify-between gap-3">
               <div>
-                <h2 className="text-2xl font-semibold text-white">
+                <h2 className="text-sm font-semibold text-white">
                   Upcoming Events
                 </h2>
-
-                <p className="mt-2 text-sm text-slate-400">
-                  View, edit and manage all your upcoming Google Calendar
-                  events.
+                <p className="text-xs text-slate-400 mt-1">
+                  View, edit and manage your calendar events
                 </p>
               </div>
 
-              {!loading && (
-                <div className="rounded-xl border border-blue-500/20 bg-blue-500/10 px-4 py-2">
-                  <span className="text-sm font-medium text-blue-300">
-                    {events.length} {events.length === 1 ? "Event" : "Events"}
+              {!loading && events.length > 0 && (
+                <div className="shrink-0 flex items-center gap-1.5 rounded-full border border-blue-500/20 bg-blue-500/10 px-3 py-1">
+                  <CalendarDays className="h-3.5 w-3.5 text-blue-400" />
+                  <span className="text-xs font-medium text-blue-300">
+                    {events.length} {events.length === 1 ? "event" : "events"}
                   </span>
                 </div>
               )}
@@ -222,16 +170,14 @@ export default function Home() {
               onEdit={handleEdit}
               onDelete={deleteEvent}
             />
+
             <DeleteDialog
               open={deleteDialogOpen}
               loading={deleteLoading}
               title={eventToDelete?.summary || "Untitled Event"}
               onOpenChange={(open) => {
                 setDeleteDialogOpen(open);
-
-                if (!open) {
-                  setEventToDelete(null);
-                }
+                if (!open) setEventToDelete(null);
               }}
               onConfirm={confirmDelete}
             />
