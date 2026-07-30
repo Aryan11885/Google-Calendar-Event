@@ -23,7 +23,7 @@ interface EventListProps {
   events: CalendarEvent[];
   loading: boolean;
   onEdit: (event: CalendarEvent) => void;
-  onDelete: (id: string) => void;
+  onDelete: (event: CalendarEvent) => void;
 }
 
 export default function EventList({
@@ -127,7 +127,7 @@ export default function EventList({
               </button>
 
               <button
-                onClick={() => onDelete(event.id)}
+                onClick={() => onDelete(event)}
                 className="inline-flex items-center justify-center gap-2 rounded-xl bg-red-600 px-5 py-3 font-medium text-white transition-all duration-300 hover:scale-[1.03] hover:bg-red-700 active:scale-[0.98]"
               >
                 <Trash2 className="h-4 w-4" />

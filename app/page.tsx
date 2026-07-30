@@ -7,6 +7,8 @@ import Navbar from "@/components/Navbar";
 import LoginButton from "@/components/LoginButton";
 import EventForm from "@/components/EventForm";
 import EventList from "@/components/EventList";
+import DeleteDialog from "@/components/DeleteDialog";
+import { toast } from "sonner";
 
 interface CalendarEvent {
   id: string;
@@ -30,6 +32,14 @@ export default function Home() {
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(
     null,
   );
+
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+
+  const [eventToDelete, setEventToDelete] = useState<CalendarEvent | null>(
+    null,
+  );
+
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   const formRef = useRef<HTMLDivElement>(null);
 
@@ -73,25 +83,42 @@ export default function Home() {
     });
   }
 
-  async function deleteEvent(id: string) {
-    const confirmed = confirm("Are you sure you want to delete this event?");
+  function deleteEvent(event: CalendarEvent) {
+    setEventToDelete(event);
+    setDeleteDialogOpen(true);
+  }
 
-    if (!confirmed) return;
+  async function confirmDelete() {
+    if (!eventToDelete || deleteLoading) return;
 
-    const response = await fetch("/api/calendar", {
-      method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ id }),
-    });
+    try {
+      setDeleteLoading(true);
 
-    if (!response.ok) {
-      alert("Failed to delete event.");
-      return;
+      const response = await fetch("/api/calendar", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          id: eventToDelete.id,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Delete failed");
+      }
+
+      toast.success("Event deleted successfully.");
+
+      await fetchEvents();
+
+      setDeleteDialogOpen(false);
+      setEventToDelete(null);
+    } catch {
+      toast.error("Failed to delete event.");
+    } finally {
+      setDeleteLoading(false);
     }
-
-    fetchEvents();
   }
 
   function clearSelectedEvent() {
@@ -194,6 +221,19 @@ export default function Home() {
               loading={loading}
               onEdit={handleEdit}
               onDelete={deleteEvent}
+            />
+            <DeleteDialog
+              open={deleteDialogOpen}
+              loading={deleteLoading}
+              title={eventToDelete?.summary || "Untitled Event"}
+              onOpenChange={(open) => {
+                setDeleteDialogOpen(open);
+
+                if (!open) {
+                  setEventToDelete(null);
+                }
+              }}
+              onConfirm={confirmDelete}
             />
           </div>
         </div>

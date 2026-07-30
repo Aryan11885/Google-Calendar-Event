@@ -10,6 +10,7 @@ import {
   Pencil,
   Plus,
 } from "lucide-react";
+import { toast } from "sonner";
 
 interface CalendarEvent {
   id: string;
@@ -95,6 +96,10 @@ export default function EventForm({
 
     setLoading(true);
 
+    const toastId = toast.loading(
+      isEditing ? "Updating event..." : "Creating event...",
+    );
+
     try {
       const response = await fetch("/api/calendar", {
         method: isEditing ? "PATCH" : "POST",
@@ -113,13 +118,15 @@ export default function EventForm({
         );
       }
 
-      alert(
+      toast.success(
         isEditing
           ? "✅ Event updated successfully!"
           : "✅ Event created successfully!",
       );
 
       await onSuccess();
+
+      toast.dismiss(toastId);
 
       if (isEditing) {
         onCancelEdit();
@@ -135,11 +142,14 @@ export default function EventForm({
     } catch (error) {
       console.error(error);
 
-      alert(
+      toast.dismiss(toastId);
+
+      toast.error(
         isEditing ? "❌ Failed to update event" : "❌ Failed to create event",
       );
     } finally {
       setLoading(false);
+      toast.dismiss(toastId);
     }
   }
 

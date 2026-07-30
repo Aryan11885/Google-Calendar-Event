@@ -12,11 +12,6 @@ export async function POST(req: Request) {
   try {
     const session = await auth();
 
-    console.log(
-      "Access Token:",
-      session?.accessToken ? "Present" : "Missing"
-    );
-
     if (!session?.accessToken) {
       return NextResponse.json(
         { message: "Unauthorized" },
@@ -63,10 +58,6 @@ export async function POST(req: Request) {
 export async function GET() {
   try {
     const session = await auth();
-
-    console.log("========== SESSION ==========");
-    console.dir(session, { depth: null });
-    console.log("=============================");
 
     if (!session?.accessToken) {
       return NextResponse.json(
