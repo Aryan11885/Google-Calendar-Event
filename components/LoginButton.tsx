@@ -55,7 +55,7 @@ export default function LoginButton() {
         </div>
         <div>
           <p className="text-sm font-semibold text-white">Connect Google</p>
-          <p className="text-xs text-slate-400">Sign in to manage events</p>
+          <p className="text-xs text-slate-400">Sign in to manage the events</p>
         </div>
       </div>
 
