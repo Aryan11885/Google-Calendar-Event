@@ -1,4 +1,5 @@
 from uuid import UUID
+from datetime import date
 
 from fastapi import APIRouter
 from fastapi import HTTPException
@@ -9,6 +10,8 @@ from app.schemas.doctor import DoctorCreate
 from app.schemas.doctor import DoctorResponse
 from app.schemas.doctor import DoctorUpdate
 from app.services.doctor_service import DoctorService
+from app.schemas.slot import SlotResponse
+from app.services.slot_service import SlotService
 
 router = APIRouter()
 
@@ -102,3 +105,29 @@ def delete_doctor(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Doctor not found",
         )
+
+@router.get(
+    "/{doctor_id}/slots",
+    response_model=list[SlotResponse],
+)
+def get_available_slots(
+    doctor_id: UUID,
+    date: date,
+    db: DBSession,
+):
+    doctor = DoctorService.get_doctor(
+        db,
+        doctor_id,
+    )
+
+    if doctor is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Doctor not found",
+        )
+
+    return SlotService.get_available_slots(
+    db,
+    doctor,
+    date,
+)

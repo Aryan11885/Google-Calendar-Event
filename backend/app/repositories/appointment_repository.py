@@ -1,0 +1,24 @@
+from datetime import date
+
+from sqlalchemy.orm import Session
+
+from app.models.appointment import Appointment
+
+
+class AppointmentRepository:
+
+    @staticmethod
+    def get_by_doctor_and_date(
+        db: Session,
+        doctor_id: str,
+        appointment_date: date,
+    ) -> list[Appointment]:
+
+        return (
+            db.query(Appointment)
+            .filter(
+                Appointment.doctor_id == doctor_id,
+                Appointment.appointment_date == appointment_date,
+            )
+            .all()
+        )

@@ -3,6 +3,7 @@ from fastapi import FastAPI
 from app.api.v1.health import router as health_router
 from app.api.v1.doctors import router as doctor_router
 from app.api.v1.patients import router as patient_router
+from app.api.v1.appointments import router as appointment_router
 from app.core.config import settings
 
 
@@ -28,6 +29,12 @@ app.include_router(
     patient_router,
     prefix="/api/v1/patients",
     tags=["Patients"],
+)
+
+app.include_router(
+    appointment_router,
+    prefix="/api/v1/appointments",
+    tags=["Appointments"],
 )
 
 
