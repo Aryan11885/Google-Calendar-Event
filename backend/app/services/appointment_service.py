@@ -66,8 +66,7 @@ class AppointmentService:
             status=AppointmentStatus.BOOKED,
         )
 
-        db.add(db_appointment)
-        db.commit()
-        db.refresh(db_appointment)
-
-        return db_appointment
+        return AppointmentRepository.create(
+            db,
+            db_appointment,
+        )

@@ -22,3 +22,15 @@ class AppointmentRepository:
             )
             .all()
         )
+
+    @staticmethod
+    def create(
+        db: Session,
+        appointment: Appointment,
+    ) -> Appointment:
+
+        db.add(appointment)
+        db.commit()
+        db.refresh(appointment)
+
+        return appointment
