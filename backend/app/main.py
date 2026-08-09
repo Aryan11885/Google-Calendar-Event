@@ -5,11 +5,18 @@ from app.api.v1.doctors import router as doctor_router
 from app.api.v1.patients import router as patient_router
 from app.api.v1.appointments import router as appointment_router
 from app.core.config import settings
+from app.api.google import router as google_router
+from starlette.middleware.sessions import SessionMiddleware
 
 
 app = FastAPI(
     title=settings.APP_NAME,
     version=settings.APP_VERSION,
+)
+
+app.add_middleware(
+    SessionMiddleware,
+    secret_key="google-calendar-secret-key-123",
 )
 
 
@@ -36,6 +43,8 @@ app.include_router(
     prefix="/api/v1/appointments",
     tags=["Appointments"],
 )
+
+app.include_router(google_router)
 
 
 @app.get("/")

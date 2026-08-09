@@ -12,7 +12,21 @@ class AppointmentCreate(BaseModel):
     patient_id: UUID
     appointment_date: date
     start_time: time
-    reason: str = Field(..., min_length=5, max_length=500)
+    reason: str = Field(
+        ...,
+        min_length=5,
+        max_length=500,
+    )
+
+
+class AppointmentUpdate(BaseModel):
+    appointment_date: date
+    start_time: time
+    reason: str = Field(
+        ...,
+        min_length=5,
+        max_length=500,
+    )
 
 
 class AppointmentResponse(BaseModel):
@@ -23,6 +37,7 @@ class AppointmentResponse(BaseModel):
     start_time: time
     end_time: time
     status: str
+    google_event_id: str | None = None
 
     model_config = ConfigDict(
         from_attributes=True,

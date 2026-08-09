@@ -1,16 +1,26 @@
+from uuid import UUID
+
 from fastapi import APIRouter
 from fastapi import HTTPException
 from fastapi import status
 
 from app.api.dependencies import DBSession
+
 from app.schemas.appointment import (
     AppointmentCreate,
+    AppointmentUpdate,
     AppointmentResponse,
 )
+
 from app.services.appointment_service import AppointmentService
+
 
 router = APIRouter()
 
+
+# ============================================================
+# CREATE APPOINTMENT
+# ============================================================
 
 @router.post(
     "/",
@@ -24,6 +34,33 @@ def create_appointment(
     try:
         return AppointmentService.create(
             db,
+            appointment,
+        )
+
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e),
+        )
+
+
+# ============================================================
+# UPDATE APPOINTMENT
+# ============================================================
+
+@router.put(
+    "/{appointment_id}",
+    response_model=AppointmentResponse,
+)
+def update_appointment(
+    appointment_id: UUID,
+    appointment: AppointmentUpdate,
+    db: DBSession,
+):
+    try:
+        return AppointmentService.update(
+            db,
+            appointment_id,
             appointment,
         )
 
