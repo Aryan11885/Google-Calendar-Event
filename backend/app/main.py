@@ -7,16 +7,30 @@ from app.api.v1.appointments import router as appointment_router
 from app.core.config import settings
 from app.api.google import router as google_router
 from starlette.middleware.sessions import SessionMiddleware
+from fastapi.middleware.cors import CORSMiddleware
 
 
 app = FastAPI(
-    title=settings.APP_NAME,
+    title=settings.APP_NAME,  
     version=settings.APP_VERSION,
 )
 
 app.add_middleware(
     SessionMiddleware,
     secret_key="google-calendar-secret-key-123",
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+        
+        "https://your-frontend.vercel.app",
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 

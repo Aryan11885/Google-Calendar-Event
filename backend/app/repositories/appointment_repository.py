@@ -60,3 +60,11 @@ class AppointmentRepository:
         db.refresh(appointment)
 
         return appointment
+
+    @staticmethod
+    def delete(
+        db: Session,
+        appointment: Appointment,
+    ):
+        db.delete(appointment)
+        db.commit()

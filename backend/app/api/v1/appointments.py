@@ -1,10 +1,11 @@
 from uuid import UUID
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from fastapi import HTTPException
 from fastapi import status
 
 from app.api.dependencies import DBSession
+from app.db.database import get_db
 
 from app.schemas.appointment import (
     AppointmentCreate,
@@ -67,5 +68,22 @@ def update_appointment(
     except ValueError as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e),
+        )
+
+@router.delete("/{appointment_id}")
+def delete_appointment(
+    appointment_id,
+    db: Session = Depends(get_db),
+):
+    try:
+        return AppointmentService.delete(
+            db,
+            appointment_id,
+        )
+
+    except ValueError as e:
+        raise HTTPException(
+            status_code=404,
             detail=str(e),
         )

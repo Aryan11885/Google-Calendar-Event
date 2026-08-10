@@ -17,6 +17,8 @@ from app.repositories.doctor_google_repository import (
 
 from app.services.google_calendar_service import (
     create_calendar_event,
+    update_calendar_event,
+    delete_calendar_event,
 )
 
 class AppointmentService:
@@ -235,5 +237,136 @@ class AppointmentService:
             db,
             existing_appointment,
         )
-
+        
+        # ----------------------------------------
+        # 7. Update Google Calendar event
+        # ----------------------------------------
+        
+        google_account = get_by_doctor(
+            db,
+            str(existing_appointment.doctor_id),
+        )
+        
+        if (
+            google_account
+            and updated_appointment.google_event_id
+        ):
+        
+            print(
+                "Updating Google Calendar event:",
+                updated_appointment.google_event_id,
+            )
+        
+            start_datetime = datetime.combine(
+                updated_appointment.appointment_date,
+                updated_appointment.start_time,
+            )
+        
+            end_datetime = datetime.combine(
+                updated_appointment.appointment_date,
+                updated_appointment.end_time,
+            )
+        
+            patient = PatientRepository.get_by_id(
+                db,
+                str(updated_appointment.patient_id),
+            )
+        
+            if patient is None:
+                raise ValueError("Patient not found")
+        
+            update_calendar_event(
+                refresh_token=google_account.refresh_token,
+                calendar_id=google_account.calendar_id,
+                event_id=updated_appointment.google_event_id,
+                patient_name=patient.full_name,
+                patient_email=patient.email,
+                start=start_datetime,
+                end=end_datetime,
+                reason=updated_appointment.reason,
+            )
+        
+            print(
+                "Google Calendar event updated:",
+                updated_appointment.google_event_id,
+            )
+        
+        else:
+        
+            print(
+                "No Google Calendar event to update."
+            )
+        
         return updated_appointment
+
+    @staticmethod
+    def delete(
+        db: Session,
+        appointment_id,
+    ):
+        # ----------------------------------------
+        # 1. Find appointment
+        # ----------------------------------------
+
+        appointment = AppointmentRepository.get_by_id(
+            db,
+            appointment_id,
+        )
+
+        if appointment is None:
+            raise ValueError("Appointment not found")
+
+        # ----------------------------------------
+        # 2. Get doctor's Google account
+        # ----------------------------------------
+
+        google_account = get_by_doctor(
+            db,
+            str(appointment.doctor_id),
+        )
+
+        # ----------------------------------------
+        # 3. Delete Google Calendar event
+        # ----------------------------------------
+
+        if (
+            google_account
+            and appointment.google_event_id
+        ):
+            print(
+                "Deleting Google Calendar event:",
+                appointment.google_event_id,
+            )
+
+            delete_calendar_event(
+                refresh_token=google_account.refresh_token,
+                calendar_id=google_account.calendar_id,
+                event_id=appointment.google_event_id,
+            )
+
+            print(
+                "Google Calendar event deleted:",
+                appointment.google_event_id,
+            )
+
+        else:
+            print(
+                "No Google Calendar event to delete."
+            )
+
+        # ----------------------------------------
+        # 4. Delete appointment from database
+        # ----------------------------------------
+
+        AppointmentRepository.delete(
+            db,
+            appointment,
+        )
+
+        # ----------------------------------------
+        # 5. Return success
+        # ----------------------------------------
+
+        return {
+            "message": "Appointment deleted successfully"
+        }
