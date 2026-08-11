@@ -142,6 +142,7 @@ class AppointmentService:
                 patient_email=patient.email,
                 start=start_datetime,
                 end=end_datetime,
+                reason=created_appointment.reason,
             )
         
             created_appointment.google_event_id = (

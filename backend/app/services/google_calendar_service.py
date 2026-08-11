@@ -12,6 +12,7 @@ def create_calendar_event(
     patient_email: str,
     start: datetime,
     end: datetime,
+    reason: str | None = None,
 ):
 
     credentials = create_credentials(
@@ -33,6 +34,7 @@ def create_calendar_event(
         "description": (
             f"Patient: {patient_name}\n"
             f"Email: {patient_email}"
+            f"Reason: {reason or 'Consultation'}"
         ),
 
         "start": {
