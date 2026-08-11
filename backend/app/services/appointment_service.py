@@ -375,11 +375,46 @@ class AppointmentService:
     @staticmethod
     def get_by_patient(
         db: Session,
-        patient_id: str,
+        patient_id,
     ):
     
-        return AppointmentRepository.get_by_patient(
+        appointments = AppointmentRepository.get_by_patient(
             db,
             patient_id,
         )
+    
+        result = []
+    
+        for appointment in appointments:
+    
+            doctor = DoctorRepository.get_by_id(
+                db,
+                appointment.doctor_id,
+            )
+    
+            if doctor is None:
+                continue
+    
+            result.append(
+                {
+                    "id": appointment.id,
+    
+                    "appointment_date": appointment.appointment_date,
+                    "start_time": appointment.start_time,
+                    "end_time": appointment.end_time,
+    
+                    "reason": appointment.reason,
+                    "status": appointment.status,
+    
+                    "google_event_id": appointment.google_event_id,
+    
+                    "doctor": {
+                        "id": doctor.id,
+                        "full_name": doctor.full_name,
+                        "specialization": doctor.specialization,
+                    },
+                }
+            )
+    
+        return result
     

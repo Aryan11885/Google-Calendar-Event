@@ -11,6 +11,7 @@ from app.schemas.appointment import (
     AppointmentCreate,
     AppointmentUpdate,
     AppointmentResponse,
+    PatientAppointmentResponse, 
 )
 
 from app.services.appointment_service import AppointmentService
@@ -90,7 +91,7 @@ def delete_appointment(
 
 @router.get(
     "/patient/{patient_id}",
-    response_model=list[AppointmentResponse],
+    response_model=list[PatientAppointmentResponse],
 )
 def get_patient_appointments(
     patient_id: UUID,
