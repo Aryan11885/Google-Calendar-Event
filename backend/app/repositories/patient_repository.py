@@ -79,3 +79,17 @@ class PatientRepository:
 
         db.delete(db_patient)
         db.commit()
+
+    @staticmethod
+    def get_by_email(
+        db: Session,
+        email: str,
+    ) -> Patient | None:
+    
+        return (
+            db.query(Patient)
+            .filter(
+                Patient.email == email
+            )
+            .first()
+        )

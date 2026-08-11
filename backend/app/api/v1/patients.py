@@ -5,15 +5,22 @@ from fastapi import HTTPException
 from fastapi import status
 
 from app.api.dependencies import DBSession
+
 from app.schemas.patient import (
     PatientCreate,
     PatientResponse,
     PatientUpdate,
 )
+
 from app.services.patient_service import PatientService
+
 
 router = APIRouter()
 
+
+# ============================================================
+# CREATE PATIENT
+# ============================================================
 
 @router.post(
     "/",
@@ -30,6 +37,10 @@ def create_patient(
     )
 
 
+# ============================================================
+# GET ALL PATIENTS
+# ============================================================
+
 @router.get(
     "/",
     response_model=list[PatientResponse],
@@ -39,6 +50,34 @@ def get_patients(
 ):
     return PatientService.get_patients(db)
 
+# ============================================================
+# GET CURRENT PATIENT BY EMAIL
+# ============================================================
+
+@router.get(
+    "/me",
+    response_model=PatientResponse,
+)
+def get_current_patient(
+    email: str,
+    db: DBSession,
+):
+    patient = PatientService.get_patient_by_email(
+        db,
+        email,
+    )
+
+    if patient is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Patient not found",
+        )
+
+    return patient
+
+# ============================================================
+# GET PATIENT BY ID
+# ============================================================
 
 @router.get(
     "/{patient_id}",
@@ -61,6 +100,10 @@ def get_patient(
 
     return patient
 
+
+# ============================================================
+# UPDATE PATIENT
+# ============================================================
 
 @router.patch(
     "/{patient_id}",
@@ -86,6 +129,10 @@ def update_patient(
     return updated
 
 
+# ============================================================
+# DELETE PATIENT
+# ============================================================
+
 @router.delete(
     "/{patient_id}",
     status_code=status.HTTP_204_NO_CONTENT,
@@ -104,3 +151,5 @@ def delete_patient(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Patient not found",
         )
+
+    return None

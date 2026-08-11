@@ -80,3 +80,13 @@ class PatientService:
         )
 
         return True
+
+    @staticmethod
+    def get_patient_by_email(
+        db: Session,
+        email: str,
+    ):
+        return PatientRepository.get_by_email(
+            db,
+            email,
+        )
