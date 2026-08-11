@@ -68,3 +68,21 @@ class AppointmentRepository:
     ):
         db.delete(appointment)
         db.commit()
+
+    @staticmethod
+    def get_by_patient(
+        db: Session,
+        patient_id: str,
+    ) -> list[Appointment]:
+    
+        return (
+            db.query(Appointment)
+            .filter(
+                Appointment.patient_id == str(patient_id)
+            )
+            .order_by(
+                Appointment.appointment_date,
+                Appointment.start_time,
+            )
+            .all()
+        )

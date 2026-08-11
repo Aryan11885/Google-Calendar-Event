@@ -371,3 +371,15 @@ class AppointmentService:
         return {
             "message": "Appointment deleted successfully"
         }
+
+    @staticmethod
+    def get_by_patient(
+        db: Session,
+        patient_id: str,
+    ):
+    
+        return AppointmentRepository.get_by_patient(
+            db,
+            patient_id,
+        )
+    

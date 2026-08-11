@@ -87,3 +87,16 @@ def delete_appointment(
             status_code=404,
             detail=str(e),
         )
+
+@router.get(
+    "/patient/{patient_id}",
+    response_model=list[AppointmentResponse],
+)
+def get_patient_appointments(
+    patient_id: UUID,
+    db: DBSession,
+):
+    return AppointmentService.get_by_patient(
+        db,
+        patient_id,
+    )
